@@ -12,11 +12,18 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 const dataLoaded = ref(false);
+const menu = ref(1);
 const points = ref([]);
+const knearest = ref([]);
+const tester = ref([]);
 
 const handleFileChange = (event) => {
+  points.value = [];
+  knearest.value = [];
+  tester.value = [];
   const file = event.target.files[0];
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -26,65 +33,82 @@ const handleFileChange = (event) => {
     const worksheet = workbook.Sheets[sheetName];
     const parsedData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     const pointsData = parsedData.slice(1).map((row) => ({
-      tahun: row[1],
-      kecamatan: row[2],
-      nama: row[3],
-      x: row[4],
-      y: row[5],
-      z: row[6],
+      kode: row[1],
+      tahun: row[2],
+      f: row[3],
+      g: row[4],
+      h: row[5],
+      i: row[6],
+      j: row[7],
+      k: row[8],
     }));
     console.log(parsedData);
-    points.value = pointsData;
+    points.value = [...pointsData];
+    const eightyPercentCount = Math.floor(pointsData.length * 0.8);
+    const twentyPercentCount = Math.ceil(pointsData.length * 0.2);
+    const tmp1 = [...pointsData];
+    const tmp2 = [...pointsData];
+    tester.value = [...tmp1.slice(-twentyPercentCount)];
+    knearest.value = [...tmp2.slice(0, eightyPercentCount)];
     dataLoaded.value = true;
   };
   reader.readAsArrayBuffer(file);
 };
 
 const c1 = (point) => {
-  const J = 324;
-  const K = 354;
-  const L = 0;
-  return Math.sqrt(
-    Math.pow(point.x - J, 2) +
-      Math.pow(point.y - K, 2) +
-      Math.pow(point.z - L, 2)
-  );
+  return point.j / point.k;
 };
 
-function c2(point) {
-  var J_init = 178;
-  var K_init = 230;
-  var L_init = 0;
-  var distance = Math.sqrt(
-    Math.pow(point.x - J_init, 2) +
-      Math.pow(point.y - K_init, 2) +
-      Math.pow(point.z - L_init, 2)
+const c2 = (point) => {
+  return point.h / point.k;
+};
+
+const roa = (point) => {
+  return point.i / point.k;
+};
+
+const gscore = (point) => {
+  return 1.65 * c1(point) + 3.404 * c2(point) - 0.016 * roa(point) + 0.057;
+};
+
+function hasil(point) {
+  return gscore(point) <= -0.02 ? "Bangkrut" : "Aman";
+}
+
+function jarak(point) {
+  let tmp = tester.value[tester.value.length - 1];
+  const diffB = c1(point) - c1(tmp);
+  const diffC = c2(point) - c2(tmp);
+  const diffD = roa(point) - roa(tmp);
+  const diffE = gscore(point) - gscore(tmp);
+
+  const distance = Math.sqrt(
+    diffB * diffB + diffC * diffC + diffD * diffD + diffE * diffE
   );
   return distance;
 }
 
-function c3(point) {
-  var J_init = 315;
-  var K_init = 341;
-  var L_init = 14;
-  var distance = Math.sqrt(
-    Math.pow(point.x - J_init, 2) +
-      Math.pow(point.y - K_init, 2) +
-      Math.pow(point.z - L_init, 2)
-  );
-  return distance;
-}
+function rank(value, arr, order = 1) {
+  const sortedArr = [...arr].sort((a, b) => (order === 1 ? a - b : b - a));
 
-function kedekatan(O5, P5, Q5) {
-  let tmp = Math.min(O5, P5, Q5);
-  let stat = "Tinggi (Bagus)";
-  if (tmp == O5) stat = "Tinggi (Bagus)";
-  if (tmp == P5) stat = "Sedang";
-  if (tmp == Q5) stat = "Kurang";
-  return {
-    status: stat,
-    tmp: tmp,
-  };
+  const ranks = new Map();
+  for (let i = 0; i < sortedArr.length; i++) {
+    const currentValue = sortedArr[i];
+    if (!ranks.has(currentValue)) {
+      const positions = sortedArr.reduce((acc, val, index) => {
+        if (val === currentValue) {
+          acc.push(index + 1);
+        }
+        return acc;
+      }, []);
+      const avgRank =
+        positions.reduce((sum, pos) => sum + pos, 0) / positions.length;
+      ranks.set(currentValue, avgRank);
+    }
+  }
+
+  // Return the rank of the given value
+  return ranks.get(value);
 }
 </script>
 <template>
@@ -94,41 +118,117 @@ function kedekatan(O5, P5, Q5) {
       <Input type="file" @change="handleFileChange" />
     </div>
     <div v-if="dataLoaded">
-      <Table>
+      <div class="flex space-x-4 mb-6">
+        <!-- {{ points.length * 0.2 }} -->
+        <Button @click="menu = 0" :variant="menu ? 'ghost' : ''"
+          >G-Score</Button
+        >
+        <Button @click="menu = 1" :variant="!menu ? 'ghost' : ''"
+          >K-Nearest</Button
+        >
+      </div>
+
+      <Table :class="menu ? 'hidden' : ''">
         <TableHeader>
           <TableRow>
             <th>No.</th>
+            <th>Kode</th>
             <th>Tahun</th>
-            <th>Kecamatan</th>
-            <th>Nama</th>
-            <th>Alokasi</th>
-            <th>Realisasi</th>
-            <th>Sisa/Kurang</th>
-            <th>C1</th>
-            <th>C2</th>
-            <th>C3</th>
-            <th>Kedekatan</th>
+            <th>Aset Lancar</th>
+            <th>Utang Lancar</th>
+            <th>Laba Kotor</th>
+            <th>Laba Bersih</th>
+            <th>Working Capita</th>
+            <th>Total Aset</th>
+            <th>X1</th>
+            <th>X2</th>
+            <th>ROA</th>
+            <th>G-Score</th>
             <th>Hasil</th>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow v-for="(point, index) in points" :key="index">
             <TableCell>{{ index + 1 }}</TableCell>
+            <TableCell>{{ point.kode }}</TableCell>
             <TableCell>{{ point.tahun }}</TableCell>
-            <TableCell>{{ point.kecamatan }}</TableCell>
-            <TableCell>{{ point.nama }}</TableCell>
 
-            <TableCell>{{ point.x }}</TableCell>
-            <TableCell>{{ point.y }}</TableCell>
-            <TableCell>{{ point.z }}</TableCell>
+            <TableCell>{{ point.f }}</TableCell>
+            <TableCell>{{ point.g }}</TableCell>
+            <TableCell>{{ point.h }}</TableCell>
+
+            <TableCell>{{ point.i }}</TableCell>
+            <TableCell>{{ point.j }}</TableCell>
+            <TableCell>{{ point.k }}</TableCell>
+
             <TableCell>{{ c1(point) }}</TableCell>
             <TableCell>{{ c2(point) }}</TableCell>
-            <TableCell>{{ c3(point) }}</TableCell>
+            <TableCell>{{ roa(point) }}</TableCell>
+            <TableCell>{{ gscore(point) }}</TableCell>
+            <TableCell
+              ><span
+                :class="
+                  hasil(point) == 'Bangkrut'
+                    ? 'text-rose-600 font-semibold'
+                    : ''
+                "
+                >{{ hasil(point) }}</span
+              ></TableCell
+            >
+          </TableRow>
+        </TableBody>
+      </Table>
+
+      <Table :class="!menu ? 'hidden' : ''">
+        <TableHeader>
+          <TableRow>
+            <th>No.</th>
+            <th>X1</th>
+            <th>X2</th>
+            <th>ROA</th>
+            <th>G-Score</th>
+            <th>Hasil</th>
+
+            <th>Jarak</th>
+            <th>Rank</th>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow
+            v-for="(point, index) in knearest"
+            :key="index"
+            :class="
+              rank(
+                jarak(point),
+                knearest.map((e) => jarak(e)),
+                1
+              ) <= 5
+                ? 'bg-amber-700/20'
+                : ''
+            "
+          >
+            <TableCell>{{ index + 1 }}</TableCell>
+            <TableCell>{{ c1(point) }}</TableCell>
+            <TableCell>{{ c2(point) }}</TableCell>
+            <TableCell>{{ roa(point) }}</TableCell>
+            <TableCell>{{ gscore(point) }}</TableCell>
+            <TableCell
+              ><span
+                :class="
+                  hasil(point) == 'Bangkrut'
+                    ? 'text-rose-600 font-semibold'
+                    : ''
+                "
+                >{{ hasil(point) }}</span
+              ></TableCell
+            >
+            <TableCell>{{ jarak(point) }}</TableCell>
             <TableCell>{{
-              kedekatan(c1(point), c2(point), c3(point))?.tmp
-            }}</TableCell>
-            <TableCell>{{
-              kedekatan(c1(point), c2(point), c3(point))?.status
+              rank(
+                jarak(point),
+                knearest.map((e) => jarak(e)),
+                1
+              )
             }}</TableCell>
           </TableRow>
         </TableBody>
