@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 const dataLoaded = ref(false);
-const menu = ref(1);
+const menu = ref(0);
 const points = ref([]);
 const knearest = ref([]);
 const tester = ref([]);
@@ -124,11 +124,11 @@ function rank(value, arr, order = 1) {
     <div v-if="dataLoaded">
       <div class="flex space-x-4 mb-6">
         <!-- {{ points.length * 0.2 }} -->
-        <Button @click="menu = 0" :variant="menu ? 'ghost' : ''"
-          >Hasil G-Score</Button
-        >
         <Button @click="menu = 1" :variant="!menu ? 'ghost' : ''"
           >Hasil Uji KNN</Button
+        >
+        <Button @click="menu = 0" :variant="menu ? 'ghost' : ''"
+          >Hasil G-Score</Button
         >
       </div>
 
@@ -194,7 +194,7 @@ function rank(value, arr, order = 1) {
             <th>Hasil</th>
 
             <th>Jarak</th>
-            <th>Rank</th>
+            <!-- <th>Rank</th> -->
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -227,13 +227,13 @@ function rank(value, arr, order = 1) {
               ></TableCell
             >
             <TableCell>{{ jarak(point) }}</TableCell>
-            <TableCell>{{
+            <!-- <TableCell>{{
               rank(
                 jarak(point),
                 knearest.map((e) => jarak(e)),
                 1
               )
-            }}</TableCell>
+            }}</TableCell> -->
           </TableRow>
         </TableBody>
       </Table>
