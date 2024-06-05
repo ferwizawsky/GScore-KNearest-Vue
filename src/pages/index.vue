@@ -116,15 +116,19 @@ function rank(value, arr, order = 1) {
     <div class="mb-10">
       <Label> Masukkan File Excel </Label>
       <Input type="file" @change="handleFileChange" />
+      <div class="py-4 text-sm">
+        <span class="mr-5">Contoh File Excel</span>
+        <a href="/g-score.xlsx"> <Button size="sm">Download Excel</Button></a>
+      </div>
     </div>
     <div v-if="dataLoaded">
       <div class="flex space-x-4 mb-6">
         <!-- {{ points.length * 0.2 }} -->
         <Button @click="menu = 0" :variant="menu ? 'ghost' : ''"
-          >G-Score</Button
+          >Hasil G-Score</Button
         >
         <Button @click="menu = 1" :variant="!menu ? 'ghost' : ''"
-          >K-Nearest</Button
+          >Hasil Uji KNN</Button
         >
       </div>
 
@@ -170,7 +174,7 @@ function rank(value, arr, order = 1) {
                 :class="
                   hasil(point) == 'Bangkrut'
                     ? 'text-rose-600 font-semibold'
-                    : ''
+                    : 'text-lime-600'
                 "
                 >{{ hasil(point) }}</span
               ></TableCell
@@ -217,7 +221,7 @@ function rank(value, arr, order = 1) {
                 :class="
                   hasil(point) == 'Bangkrut'
                     ? 'text-rose-600 font-semibold'
-                    : ''
+                    : 'text-lime-600'
                 "
                 >{{ hasil(point) }}</span
               ></TableCell

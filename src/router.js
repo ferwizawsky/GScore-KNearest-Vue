@@ -9,6 +9,15 @@ const routes = [
     path: "/",
     name: "Home",
     // redirect: "/admin",
+    component: () => import("./pages/landing/beranda.vue"),
+    // meta: {
+    //   public: false,
+    // },
+  },
+  {
+    path: "/hitung",
+    name: "Hitung",
+    // redirect: "/admin",
     component: () => import("./pages/index.vue"),
     // meta: {
     //   public: false,
