@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 
 let tutor = [
-  "Langkah pertama klik DO IT pada halaman home untuk masuk ke halaman perhitungan prediksi. ",
+  "Langkah pertama klik DO IT pada halaman ini untuk masuk ke halaman perhitungan prediksi. ",
   "Kedua, setelah masuk ke halaman perhitungan, masukkan file excel yang diminta pada halaman prediksi",
   "Ketiga, klik hitung g-score untuk mengetahui prediksi atau kondisi perusahaan.",
   "Keempat, setelah mengetahui kondisi perusahaan klik uji KNN untuk menguji atau memastikan hasil uji benar valid.",
@@ -24,22 +24,13 @@ let tutor = [
           <h1
             class="text-6xl xl:text-10xl font-abhaya-libre text-primary font-bold leading-none"
           >
-            SISTEM
+            Tutorial
           </h1>
-          <h2
-            class="text-xl xl:text-3xl font-abhaya-libre text-primary uppercase font-bold leading-none tracking-widest -mt-2 mb-6"
-          >
-            PREDIKSI INSOLVENCY
-          </h2>
-          <p class="xl:text-lg tracking-wider text-gray-700 font-alegraya-sans">
-            Aplikasi ini merupakan inovasi untuk mempermudah perusahaan
-            mengetahui kondisi kesehatan perusahaannya. Dimana pada aplikasi ini
-            akan mengelompokkan perusahaan kedalam suatu kondisi bangkrut atau
-            tidak bangkrut sesuai dengan algoritma yang digunakan dalam aplikasi
-            ini.
-          </p>
-          <RouterLink to="/tutorial">
-            <Button class="px-10 mt-6">Get Started</Button></RouterLink
+          <div v-for="(item, index) in tutor" class="py-1">
+            {{ index + 1 }} .{{ item }}
+          </div>
+          <RouterLink to="/hitung">
+            <Button class="px-10 mt-6">Do it</Button></RouterLink
           >
         </div>
         <div
@@ -120,7 +111,7 @@ let tutor = [
         </div>
       </div>
       <svg
-        class="absolute left-0 top-0 w-full h-screen object-cover"
+        class="absolute left-0 top-0 w-full h-screen"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 645.55 419.74"
         preserveAspectRatio="xMinYMid slice"

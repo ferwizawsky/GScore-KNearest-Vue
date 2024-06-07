@@ -113,23 +113,45 @@ function rank(value, arr, order = 1) {
 </script>
 <template>
   <div class="max-w-[1200px] p-4 pt-10 mx-auto">
-    <div class="mb-10">
-      <Label> Masukkan File Excel </Label>
-      <Input type="file" @change="handleFileChange" />
-      <div class="py-4 text-sm">
-        <span class="mr-5">Contoh File Excel</span>
-        <a href="/g-score.xlsx"> <Button size="sm">Download Excel</Button></a>
+    <div v-if="!dataLoaded" class="mb-10 grid grid-cols-2 items-center">
+      <div>
+        <Label> Masukkan File Excel </Label>
+        <Input type="file" @change="handleFileChange" />
+      </div>
+      <div class="text-sm pt-6 pl-5 flex items-center space-x-4">
+        <a href="/g-score.xlsx">
+          <Button size="icon"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-file-down"
+            >
+              <path
+                d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
+              />
+              <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+              <path d="M12 18v-6" />
+              <path d="m9 15 3 3 3-3" /></svg></Button
+        ></a>
+        &nbsp;&nbsp; Contoh Excel
       </div>
     </div>
     <div v-if="dataLoaded">
       <div class="flex space-x-4 mb-6">
         <!-- {{ points.length * 0.2 }} -->
-        <Button @click="menu = 1" :variant="!menu ? 'ghost' : ''"
-          >Hasil Uji KNN</Button
-        >
-        <Button @click="menu = 0" :variant="menu ? 'ghost' : ''"
-          >Hasil G-Score</Button
-        >
+        <Button @click="menu = 0" :variant="menu ? 'ghost' : ''">
+          Hasil G-Score
+        </Button>
+        <Button @click="menu = 1" :variant="!menu ? 'ghost' : ''">
+          Hasil Uji KNN
+        </Button>
       </div>
 
       <Table :class="menu ? 'hidden' : ''">

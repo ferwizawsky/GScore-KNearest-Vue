@@ -15,6 +15,15 @@ const routes = [
     // },
   },
   {
+    path: "/tutorial",
+    name: "Tutorial",
+    // redirect: "/admin",
+    component: () => import("./pages/landing/tutorial.vue"),
+    // meta: {
+    //   public: false,
+    // },
+  },
+  {
     path: "/hitung",
     name: "Hitung",
     // redirect: "/admin",
