@@ -214,8 +214,8 @@ function rank(value, arr, order = 1) {
             <th>ROA</th>
             <th>G-Score</th>
             <th>Hasil</th>
-
             <th>Jarak</th>
+            <th>Hasil Uji KNN</th>
             <!-- <th>Rank</th> -->
           </TableRow>
         </TableHeader>
@@ -249,6 +249,17 @@ function rank(value, arr, order = 1) {
               ></TableCell
             >
             <TableCell>{{ jarak(point) }}</TableCell>
+
+            <TableCell
+              ><span
+                :class="
+                  hasil(point) == 'Bangkrut'
+                    ? 'text-rose-600 font-semibold'
+                    : 'text-lime-600'
+                "
+                >{{ hasil(point) }}</span
+              ></TableCell
+            >
             <!-- <TableCell>{{
               rank(
                 jarak(point),
