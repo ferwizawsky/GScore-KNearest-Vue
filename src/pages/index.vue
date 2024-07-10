@@ -19,6 +19,7 @@ const menu = ref(0);
 const points = ref([]);
 const knearest = ref([]);
 const tester = ref([]);
+const search = ref("");
 
 const handleFileChange = (event) => {
   points.value = [];
@@ -106,13 +107,38 @@ function rank(value, arr, order = 1) {
       ranks.set(currentValue, avgRank);
     }
   }
-
-  // Return the rank of the given value
   return ranks.get(value);
+}
+
+function filterBySearch(array, searchTerm) {
+  return array.filter((item) => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    // Iterate through object properties using Object.keys
+    for (const key of Object.keys(item)) {
+      // Check if property value is a string and includes the search term (case-insensitive)
+      if (
+        typeof item[key] === "string" &&
+        item[key].toLowerCase().includes(lowerCaseSearchTerm)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  });
 }
 </script>
 <template>
+  <div class="border-b p-4">
+    <div class="flex justify-between">
+      <div></div>
+      <div class="space-x-4">
+        <RouterLink to="/">Home</RouterLink>
+        <RouterLink to="/tutorial">Tutorial</RouterLink>
+      </div>
+    </div>
+  </div>
   <div class="max-w-[1200px] p-4 pt-10 mx-auto">
+    <div class="pb-4"><RouterLink to="/"><< Kembali</RouterLink></div>
     <div v-if="!dataLoaded" class="mb-10 grid grid-cols-2 items-center">
       <div>
         <Label> Masukkan File Excel </Label>
@@ -144,14 +170,19 @@ function rank(value, arr, order = 1) {
       </div>
     </div>
     <div v-if="dataLoaded">
-      <div class="flex space-x-4 mb-6">
-        <!-- {{ points.length * 0.2 }} -->
-        <Button @click="menu = 0" :variant="menu ? 'ghost' : ''">
-          Hasil G-Score
-        </Button>
-        <Button @click="menu = 1" :variant="!menu ? 'ghost' : ''">
-          Hasil Uji KNN
-        </Button>
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex space-x-4">
+          <!-- {{ points.length * 0.2 }} -->
+          <Button @click="menu = 0" :variant="menu ? 'ghost' : ''">
+            Hasil G-Score
+          </Button>
+          <Button @click="menu = 1" :variant="!menu ? 'ghost' : ''">
+            Hasil Uji KNN
+          </Button>
+        </div>
+        <div>
+          <Input v-model="search" placeholder="Search Kode...." />
+        </div>
       </div>
 
       <Table :class="menu ? 'hidden' : ''">
@@ -174,7 +205,10 @@ function rank(value, arr, order = 1) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="(point, index) in points" :key="index">
+          <TableRow
+            v-for="(point, index) in filterBySearch(points, search)"
+            :key="index"
+          >
             <TableCell>{{ index + 1 }}</TableCell>
             <TableCell>{{ point.kode }}</TableCell>
             <TableCell>{{ point.tahun }}</TableCell>
@@ -221,7 +255,7 @@ function rank(value, arr, order = 1) {
         </TableHeader>
         <TableBody>
           <TableRow
-            v-for="(point, index) in knearest"
+            v-for="(point, index) in filterBySearch(knearest, search)"
             :key="index"
             :class="
               rank(
@@ -229,7 +263,7 @@ function rank(value, arr, order = 1) {
                 knearest.map((e) => jarak(e)),
                 1
               ) <= 5
-                ? 'bg-amber-700/20'
+                ? ''
                 : ''
             "
           >
